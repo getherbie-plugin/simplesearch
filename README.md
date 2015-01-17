@@ -15,3 +15,6 @@ Danach aktivierst du das Plugin in der Konfigurationsdatei.
         enable:
             - simplesearch
 
+## Demo
+
+<http://getherbie.org/suche?query=herbie>
