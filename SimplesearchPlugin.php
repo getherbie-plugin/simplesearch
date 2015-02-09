@@ -47,7 +47,6 @@ class SimplesearchPlugin extends Herbie\Plugin
     }
 
     /**
-     * @param string $shortname
      * @return string
      */
     public function results()
@@ -140,7 +139,7 @@ class SimplesearchPlugin extends Herbie\Plugin
 
     /**
      * @param string $query
-     * @param array $page
+     * @param array $data
      * @return bool
      */
     protected function match($query, array $data)
