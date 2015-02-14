@@ -1,11 +1,11 @@
 {% if submitted %}
     <div class="plugin-simplesearch-results">
         {% if query == false %}
-            <p>Bitte geben Sie einen Suchbegriff ein.</p>
+            <p>{{ translate('simplesearch', 'Please enter a search term.') }}</p>
         {% elseif results|length == 0 %}
-            <p>Keine Ergebnisse für '{{ query }}' gefunden.</p>
+            <p>{{ translate('simplesearch', 'No results found for {query}.', {'{query}': query}) }}</p>
         {% else %}
-            <p>{{ results|length }} Ergebnisse gefunden.</p>
+            <p>{{ translate('simplesearch', '{count} results found.', {'{count}': results|length}) }}</p>
             {% for result in results %}
                 <div class="result">
                     <div class="title">{{ link(result.route, result.title) }}</div>
