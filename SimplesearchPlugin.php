@@ -69,8 +69,8 @@ class SimplesearchPlugin extends Herbie\Plugin
      */
     public function onPluginsInitialized(Herbie\Event $event)
     {
-        if($this->app['config']->isEmpty('plugins.config.simplesearch.no_page')) {
-            $this->app['config']->push('pages.extra_paths', '@plugin/simplesearch/pages');
+        if($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
+            $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
         }
     }
 
