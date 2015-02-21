@@ -69,14 +69,9 @@ class SimplesearchPlugin extends Herbie\Plugin
      */
     public function onPluginsInitialized(Herbie\Event $event)
     {
-        $alias = $this->getPathAlias();
-        $path = $this->app['alias']->get($alias);
-        $loader = new FrontMatterLoader();
-        $item = $loader->load($path);
-        $item['path'] = $alias;
-        $event['app']['menu']->addItem(
-            new Menu\Page\Item($item)
-        );
+        if($this->app['config']->isEmpty('plugins.config.simplesearch.no_page')) {
+            $this->app['config']->push('pages.extra_paths', '@plugin/simplesearch/pages');
+        }
     }
 
     /**
