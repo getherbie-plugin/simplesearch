@@ -110,7 +110,7 @@ class SimplesearchPlugin extends Herbie\Plugin
         $max = 100;
         $results = [];
 
-        $pathAlias = $this->getPathAlias();
+        $excludedUrls = $this->getExcludedUrls();
         $usePageCache = $this->config('cache.page.enable', false);
         $usePageCache &= $this->config('plugins.config.simplesearch.use_page_cache', false);
 
@@ -119,7 +119,7 @@ class SimplesearchPlugin extends Herbie\Plugin
         $appendIterator->append($this->app['posts']->getIterator());
 
         foreach ($appendIterator as $item) {
-            if ($i>$max || empty($item->title) || $item->path == $pathAlias) {
+            if ($i>$max || empty($item->title) || in_array($item->path, $excludedUrls)) {
                 continue;
             }
             $data = $this->loadPageData($item, $usePageCache);
@@ -151,13 +151,13 @@ class SimplesearchPlugin extends Herbie\Plugin
     }
 
     /**
-     * @return string
+     * @return array
      */
-    protected function getPathAlias()
+    protected function getExcludedUrls()
     {
         return $this->config(
-            'plugins.config.simplesearch.page.search',
-            '@plugin/simplesearch/pages/search.html'
+            'plugins.config.simplesearch.excluded_urls',
+            ['@plugin/adminpanel/pages/search.html']
         );
     }
 }

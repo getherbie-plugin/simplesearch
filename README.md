@@ -15,6 +15,16 @@ Danach aktivierst du das Plugin in der Konfigurationsdatei.
         enable:
             - simplesearch
 
+## Konfiguration
+
+Du kannst einzelne URL's von der Suche ausschließen.
+
+Ergänze dazu die Konfigurationsdatei:
+
+    config:
+        simplesearch:
+            excluded_urls: ['@plugin/adminpanel/pages/adminpanel.html', '@plugin/simplesearch/pages/suche.html' ]
+
 ## Demo
 
 <http://getherbie.org/suche?query=herbie>
