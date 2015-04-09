@@ -15,6 +15,8 @@ Danach aktivierst du das Plugin in der Konfigurationsdatei.
         enable:
             - simplesearch
 
+Du kannst einzelne Seiten mit der Seiteneigenschaft "no_search: 1" von der Suche ausschliessen.
+
 ## Demo
 
 <http://getherbie.org/suche?query=herbie>
