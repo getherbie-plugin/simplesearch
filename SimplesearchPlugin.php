@@ -40,9 +40,9 @@ class SimplesearchPlugin extends Herbie\Plugin
             'plugins.config.simplesearch.template.form',
             '@plugin/simplesearch/templates/form.twig'
         );
-        return $this->app['twig']->render($template, [
+        return $this->render($template, [
             'action' => 'suche',
-            'query' => $this->app['request']->get('query'),
+            'query' => $this->getService('Request')->get('query'),
         ]);
     }
 
@@ -51,13 +51,13 @@ class SimplesearchPlugin extends Herbie\Plugin
      */
     public function results()
     {
-        $query = $this->app['request']->get('query');
+        $query = $this->getService('Request')->get('query');
         $results = $this->search($query);
         $template = $this->config(
             'plugins.config.simplesearch.template.results',
             '@plugin/simplesearch/templates/results.twig'
         );
-        return $this->app['twig']->render($template, [
+        return $this->render($template, [
             'query' => $query,
             'results' => $results,
             'submitted' => isset($query)
@@ -82,13 +82,13 @@ class SimplesearchPlugin extends Herbie\Plugin
     protected function loadPageData(Menu\ItemInterface $item, $usePageCache)
     {
         if (!$usePageCache) {
-            $page = $this->app['pageLoader']->load($item->path, false);
+            $page = $this->getService('Loader\PageLoader')->load($item->path, false);
             $title = isset($page['data']['title']) ? $page['data']['title'] : '';
             $content = $page['segments'] ? implode('', $page['segments']) : '';
             return [$title, $content];
         }
 
-        $content = $this->app['pageCache']->get($item->path);
+        $content = $this->getService('Cache\PageCache')->get($item->path);
         if ($content !== false) {
             return [strip_tags($content)];
         }
@@ -114,8 +114,8 @@ class SimplesearchPlugin extends Herbie\Plugin
         $usePageCache &= $this->config('plugins.config.simplesearch.use_page_cache', false);
 
         $appendIterator = new \AppendIterator();
-        $appendIterator->append($this->app['menu']->getIterator());
-        $appendIterator->append($this->app['posts']->getIterator());
+        $appendIterator->append($this->getService('Menu\Page\Collection')->getIterator());
+        $appendIterator->append($this->getService('Menu\Post\Collection')->getIterator());
 
         foreach ($appendIterator as $item) {
             if ($i>$max || empty($item->title) || !empty($item->no_search)) {
