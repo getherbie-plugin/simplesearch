@@ -42,7 +42,7 @@ class SimplesearchPlugin extends Herbie\Plugin
         );
         return $this->render($template, [
             'action' => 'suche',
-            'query' => $this->getService('Request')->get('query'),
+            'query' => $this->getService('Request')->getQuery('query'),
         ]);
     }
 
@@ -51,7 +51,7 @@ class SimplesearchPlugin extends Herbie\Plugin
      */
     public function results()
     {
-        $query = $this->getService('Request')->get('query');
+        $query = $this->getService('Request')->getQuery('query');
         $results = $this->search($query);
         $template = $this->config(
             'plugins.config.simplesearch.template.results',
