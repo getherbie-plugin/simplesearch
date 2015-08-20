@@ -19,16 +19,42 @@ use Twig_SimpleFunction;
 class SimplesearchPlugin extends Herbie\Plugin
 {
     /**
-     * @param Herbie\Event $event
+     * @return array
      */
-    public function onTwigInitialized(Herbie\Event $event)
+    public function getSubscribedEvents()
     {
-        $event['twig']->addFunction(
+        $events = [];
+        if ((bool)$this->config('plugins.config.simplesearch.twig', false)) {
+            $events[] = 'onTwigInitialized';
+        }
+        if ((bool)$this->config('plugins.config.simplesearch.shortcode', true)) {
+            $events[] = 'onShortcodeInitialized';
+        }
+        $events[] = 'onPluginsInitialized';
+        return $events;
+    }
+
+    public function onTwigInitialized($twig)
+    {
+        $twig->addFunction(
             new Twig_SimpleFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
         );
-        $event['twig']->addFunction(
+        $twig->addFunction(
             new Twig_SimpleFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
         );
+    }
+
+    public function onShortcodeInitialized($shortcode)
+    {
+        $shortcode->add('simplesearch_form', [$this, 'form']);
+        $shortcode->add('simplesearch_results', [$this, 'results']);
+    }
+
+    public function onPluginsInitialized()
+    {
+        if($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
+            $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
+        }
     }
 
     /**
@@ -65,16 +91,6 @@ class SimplesearchPlugin extends Herbie\Plugin
     }
 
     /**
-     * @param Herbie\Event $event
-     */
-    public function onPluginsInitialized(Herbie\Event $event)
-    {
-        if($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
-            $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
-        }
-    }
-
-    /**
      * @param Menu\ItemInterface $item
      * @param bool $usePageCache
      * @return array
@@ -88,7 +104,9 @@ class SimplesearchPlugin extends Herbie\Plugin
             return [$title, $content];
         }
 
-        $content = $this->getService('Cache\PageCache')->get($item->path);
+        // @see Herbie\Application::renderPage()
+        $cacheId = 'page-' . $item->route;
+        $content = $this->getService('Cache\PageCache')->get($cacheId);
         if ($content !== false) {
             return [strip_tags($content)];
         }
