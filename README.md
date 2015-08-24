@@ -15,7 +15,39 @@ Danach aktivierst du das Plugin in der Konfigurationsdatei.
         enable:
             - simplesearch
 
-Du kannst einzelne Seiten mit der Seiteneigenschaft "no_search: 1" von der Suche ausschliessen.
+
+## Konfiguration
+
+Unter `plugins.config.simplesearch` stehen dir die folgenden Optionen zur Verfügung:
+
+    # template paths to twig templates 
+    template:
+        form: @plugin/simplesearch/templates/form.twig
+        results: @plugin/simplesearch/templates/results.twig
+
+    # enable shortcode
+    shortcode: true
+
+    # enable twig function
+    twig: false
+    
+    # if set no extra page will be included (you do it manually)
+    no_page: false
+    
+    # use page cache (if cache.page.enable is set)
+    use_page_cache: false
+    
+
+## Seiteneigenschaften
+
+Mit der Seiteneigenschaft `no_search` kannst du einzelne Seiten von der Suche ausschliessen. Die Seiteneigenschaften
+für eine solche Seite sieht wie folgt aus:
+
+    ---
+    title: Titel
+    no_search: true
+    ---
+
 
 ## Demo
 
