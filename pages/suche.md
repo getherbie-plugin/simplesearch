@@ -2,10 +2,9 @@
 title: Suche
 nocache: 1
 hidden: 1
-plugin: simplesearch
 ---
 
-<h1>Suche</h1>
+# Suche
 
 [simplesearch_form]
 
