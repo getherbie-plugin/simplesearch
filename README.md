@@ -68,4 +68,4 @@ du eine eigene Suchseite hinzufügen. Das minimale Setup für eine solche Seite 
 
 ## Demo
 
-<http://getherbie.org/suche?query=herbie>
+<http://www.getherbie.org/suche?query=herbie>
