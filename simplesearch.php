@@ -1,34 +1,40 @@
 <?php
 
-use Herbie\DI;
-use Herbie\Hook;
-use Herbie\Menu;
+namespace herbie\plugin\simplesearch;
 
-class SimplesearchPlugin
+use Herbie\Config;
+use Herbie\Menu\ItemInterface;
+use herbie\plugin\twig\classes\Twig;
+use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManagerInterface;
+
+class SimplesearchPlugin extends \Herbie\Plugin
 {
+    /** @var Config */
     private $config;
-
-    public function __construct()
-    {
-        $this->config = DI::get('Config');
-    }
 
     /**
      * @return array
      */
-    public function install()
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
+        $this->config = $this->herbie->getConfig();
         if ((bool)$this->config->get('plugins.config.simplesearch.twig', false)) {
-            Hook::attach('twigInitialized', [$this, 'addTwigFunctions']);
+            $events->attach('twigInitialized', [$this, 'onTwigInitialized'], $priority);
         }
         if ((bool)$this->config->get('plugins.config.simplesearch.shortcode', true)) {
-            Hook::attach('shortcodeInitialized', [$this, 'addShortcodes']);
+            $events->attach('shortcodeInitialized', [$this, 'onShortcodeInitialized'], $priority);
         }
-        Hook::attach('pluginsInitialized', [$this, 'addPagePath']);
+        $events->attach('pluginsInitialized', [$this, 'onPluginsInitialized'], $priority);
     }
 
-    public function addTwigFunctions($twig)
+    /**
+     * @param EventInterface $event
+     */
+    public function onTwigInitialized(EventInterface $event)
     {
+        /** @var Twig $twig */
+        $twig = $event->getTarget();
         $twig->addFunction(
             new \Twig_SimpleFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
         );
@@ -37,13 +43,21 @@ class SimplesearchPlugin
         );
     }
 
-    public function addShortcodes($shortcode)
+    /**
+     * @param EventInterface $event
+     */
+    public function onShortcodeInitialized(EventInterface $event)
     {
+        /** @var Shortcode $shortcode */
+        $shortcode = $event->getTarget();
         $shortcode->add('simplesearch_form', [$this, 'form']);
         $shortcode->add('simplesearch_results', [$this, 'results']);
     }
 
-    public function addPagePath()
+    /**
+     * @param EventInterface $event
+     */
+    public function onPluginsInitialized(EventInterface $event)
     {
         if($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
             $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
@@ -53,30 +67,33 @@ class SimplesearchPlugin
     /**
      * @return string
      */
-    public function form()
+    public function form(): string
     {
         $template = $this->config->get(
             'plugins.config.simplesearch.template.form',
             '@plugin/simplesearch/templates/form.twig'
         );
-        return DI::get('Twig')->render($template, [
+        $queryParams = $this->herbie->getRequest()->getQueryParams();
+        return $this->herbie->getTwig()->render($template, [
             'action' => 'suche',
-            'query' => DI::get('Request')->getQuery('query'),
+            'query' => $queryParams['query'] ?? '',
         ]);
     }
 
     /**
      * @return string
+     * @throws \Exception
      */
-    public function results()
+    public function results(): string
     {
-        $query = DI::get('Request')->getQuery('query');
+        $queryParams = $this->herbie->getRequest()->getQueryParams();
+        $query = $queryParams['query'] ?? '';
         $results = $this->search($query);
         $template = $this->config->get(
             'plugins.config.simplesearch.template.results',
             '@plugin/simplesearch/templates/results.twig'
         );
-        return DI::get('Twig')->render($template, [
+        return $this->herbie->getTwig()->render($template, [
             'query' => $query,
             'results' => $results,
             'submitted' => isset($query)
@@ -84,14 +101,16 @@ class SimplesearchPlugin
     }
 
     /**
-     * @param Menu\ItemInterface $item
+     * @param ItemInterface $item
      * @param bool $usePageCache
      * @return array
+     * @throws Exception
+     * @throws \Exception
      */
-    protected function loadPageData(Menu\ItemInterface $item, $usePageCache)
+    protected function loadPageData(ItemInterface $item, bool $usePageCache): array
     {
         if (!$usePageCache) {
-            $page = DI::get('Loader\PageLoader')->load($item->path, false);
+            $page = $this->herbie->getPageLoader()->load($item->path, false);
             $title = isset($page['data']['title']) ? $page['data']['title'] : '';
             $content = $page['segments'] ? implode('', $page['segments']) : '';
             return [$title, $content];
@@ -99,7 +118,7 @@ class SimplesearchPlugin
 
         // @see Herbie\Application::renderPage()
         $cacheId = 'page-' . $item->route;
-        $content = DI::get('Cache\PageCache')->get($cacheId);
+        $content = $this->herbie->getPageCache()->get($cacheId);
         if ($content !== false) {
             return [strip_tags($content)];
         }
@@ -108,10 +127,12 @@ class SimplesearchPlugin
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @return array
+     * @throws Exception
+     * @throws \Exception
      */
-    protected function search($query)
+    protected function search(string $query): array
     {
         if (empty($query)) {
             return [];
@@ -125,8 +146,8 @@ class SimplesearchPlugin
         $usePageCache &= $this->config->get('plugins.config.simplesearch.use_page_cache', false);
 
         $appendIterator = new \AppendIterator();
-        $appendIterator->append(DI::get('Menu\Page\Collection')->getIterator());
-        $appendIterator->append(DI::get('Menu\Post\Collection')->getIterator());
+        $appendIterator->append($this->herbie->getMenuPageCollection()->getIterator());
+        $appendIterator->append($this->herbie->getMenuPostCollection()->getIterator());
 
         foreach ($appendIterator as $item) {
             if ($i>$max || empty($item->title) || !empty($item->no_search)) {
@@ -147,7 +168,7 @@ class SimplesearchPlugin
      * @param array $data
      * @return bool
      */
-    protected function match($query, array $data)
+    protected function match(string $query, array $data): bool
     {
         foreach ($data as $part) {
             if (empty($part)) {
@@ -161,5 +182,3 @@ class SimplesearchPlugin
     }
 
 }
-
-(new SimplesearchPlugin())->install();
