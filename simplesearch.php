@@ -119,7 +119,7 @@ class SimplesearchPlugin extends \Herbie\Plugin
         // @see Herbie\Application::renderPage()
         $cacheId = 'page-' . $item->route;
         $content = $this->herbie->getPageCache()->get($cacheId);
-        if ($content !== false) {
+        if ($content !== null) {
             return [strip_tags($content)];
         }
 
