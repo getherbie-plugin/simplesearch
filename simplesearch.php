@@ -3,7 +3,7 @@
 namespace herbie\plugin\simplesearch;
 
 use Herbie\Config;
-use Herbie\Menu\ItemInterface;
+use Herbie\Menu\MenuItem;
 use herbie\plugin\twig\classes\Twig;
 use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerInterface;
@@ -101,25 +101,26 @@ class SimplesearchPlugin extends \Herbie\Plugin
     }
 
     /**
-     * @param ItemInterface $item
+     * @param MenuItem $item
      * @param bool $usePageCache
      * @return array
      * @throws Exception
      * @throws \Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    protected function loadPageData(ItemInterface $item, bool $usePageCache): array
+    protected function loadPageData(MenuItem $item, bool $usePageCache): array
     {
         if (!$usePageCache) {
-            $page = $this->herbie->getPageLoader()->load($item->path, false);
-            $title = isset($page['data']['title']) ? $page['data']['title'] : '';
-            $content = $page['segments'] ? implode('', $page['segments']) : '';
+            $page = $this->herbie->getPageRepository()->find($item->path);
+            $title = $page->getTitle();
+            $content = implode('', $page->getSegments());
             return [$title, $content];
         }
 
         // @see Herbie\Application::renderPage()
         $cacheId = 'page-' . $item->route;
         $content = $this->herbie->getPageCache()->get($cacheId);
-        if ($content !== false) {
+        if ($content !== null) {
             return [strip_tags($content)];
         }
 
@@ -146,8 +147,7 @@ class SimplesearchPlugin extends \Herbie\Plugin
         $usePageCache &= $this->config->get('plugins.config.simplesearch.use_page_cache', false);
 
         $appendIterator = new \AppendIterator();
-        $appendIterator->append($this->herbie->getMenuPageCollection()->getIterator());
-        $appendIterator->append($this->herbie->getMenuPostCollection()->getIterator());
+        $appendIterator->append($this->herbie->getMenuList()->getIterator());
 
         foreach ($appendIterator as $item) {
             if ($i>$max || empty($item->title) || !empty($item->no_search)) {
