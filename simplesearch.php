@@ -20,12 +20,12 @@ class SimplesearchPlugin extends \Herbie\Plugin
     {
         $this->config = $this->herbie->getConfig();
         if ((bool)$this->config->get('plugins.config.simplesearch.twig', false)) {
-            $events->attach('twigInitialized', [$this, 'onTwigInitialized'], $priority);
+            $events->attach('onTwigInitialized', [$this, 'onTwigInitialized'], $priority);
         }
         if ((bool)$this->config->get('plugins.config.simplesearch.shortcode', true)) {
-            $events->attach('shortcodeInitialized', [$this, 'onShortcodeInitialized'], $priority);
+            $events->attach('onShortcodeInitialized', [$this, 'onShortcodeInitialized'], $priority);
         }
-        $events->attach('pluginsInitialized', [$this, 'onPluginsInitialized'], $priority);
+        $events->attach('onPluginsInitialized', [$this, 'onPluginsInitialized'], $priority);
     }
 
     /**
@@ -59,7 +59,7 @@ class SimplesearchPlugin extends \Herbie\Plugin
      */
     public function onPluginsInitialized(EventInterface $event)
     {
-        if($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
+        if ($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
             $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
         }
     }
