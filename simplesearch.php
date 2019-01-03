@@ -16,7 +16,7 @@ class SimplesearchPlugin extends \Herbie\Plugin
     /**
      * @return array
      */
-    public function attach(EventManagerInterface $events, $priority = 1)
+    public function attach(EventManagerInterface $events, $priority = 1): void
     {
         $this->config = $this->herbie->getConfig();
         if ((bool)$this->config->get('plugins.config.simplesearch.twig', false)) {
