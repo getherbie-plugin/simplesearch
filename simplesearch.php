@@ -2,7 +2,6 @@
 
 namespace herbie\plugin\simplesearch;
 
-use Herbie\Config;
 use Herbie\Menu\MenuItem;
 use herbie\plugin\twig\classes\Twig;
 use Zend\EventManager\EventInterface;
@@ -10,19 +9,16 @@ use Zend\EventManager\EventManagerInterface;
 
 class SimplesearchPlugin extends \Herbie\Plugin
 {
-    /** @var Config */
-    private $config;
 
     /**
      * @return array
      */
     public function attach(EventManagerInterface $events, $priority = 1): void
     {
-        $this->config = $this->herbie->getConfig();
-        if ((bool)$this->config->get('plugins.config.simplesearch.twig', false)) {
+        if ((bool)$this->getConfig()->get('plugins.config.simplesearch.twig', false)) {
             $events->attach('onTwigInitialized', [$this, 'onTwigInitialized'], $priority);
         }
-        if ((bool)$this->config->get('plugins.config.simplesearch.shortcode', true)) {
+        if ((bool)$this->getConfig()->get('plugins.config.simplesearch.shortcode', true)) {
             $events->attach('onShortcodeInitialized', [$this, 'onShortcodeInitialized'], $priority);
         }
         $events->attach('onPluginsInitialized', [$this, 'onPluginsInitialized'], $priority);
@@ -59,8 +55,8 @@ class SimplesearchPlugin extends \Herbie\Plugin
      */
     public function onPluginsInitialized(EventInterface $event)
     {
-        if ($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
-            $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
+        if ($this->getConfig()->isEmpty('plugins.config.simplesearch.no_page')) {
+            $this->getConfig()->push('pages.extra_paths', '@plugin/simplesearch/pages');
         }
     }
 
@@ -69,13 +65,14 @@ class SimplesearchPlugin extends \Herbie\Plugin
      */
     public function form(): string
     {
-        $template = $this->config->get(
+        $template = $this->getConfig()->get(
             'plugins.config.simplesearch.template.form',
             '@plugin/simplesearch/templates/form.twig'
         );
-        $queryParams = $this->herbie->getRequest()->getQueryParams();
-        return $this->herbie->getTwig()->render($template, [
-            'action' => 'suche',
+        $action = $this->getEnvironment()->getPathInfo();
+        $queryParams = $this->getRequest()->getQueryParams();
+        return $this->getTwig()->render($template, [
+            'action' => $action,
             'query' => $queryParams['query'] ?? '',
         ]);
     }
@@ -86,14 +83,14 @@ class SimplesearchPlugin extends \Herbie\Plugin
      */
     public function results(): string
     {
-        $queryParams = $this->herbie->getRequest()->getQueryParams();
+        $queryParams = $this->getRequest()->getQueryParams();
         $query = $queryParams['query'] ?? '';
         $results = $this->search($query);
-        $template = $this->config->get(
+        $template = $this->getConfig()->get(
             'plugins.config.simplesearch.template.results',
             '@plugin/simplesearch/templates/results.twig'
         );
-        return $this->herbie->getTwig()->render($template, [
+        return $this->getTwig()->render($template, [
             'query' => $query,
             'results' => $results,
             'submitted' => isset($query)
@@ -111,7 +108,7 @@ class SimplesearchPlugin extends \Herbie\Plugin
     protected function loadPageData(MenuItem $item, bool $usePageCache): array
     {
         if (!$usePageCache) {
-            $page = $this->herbie->getPageRepository()->find($item->path);
+            $page = $this->getPageRepository()->find($item->path);
             $title = $page->getTitle();
             $content = implode('', $page->getSegments());
             return [$title, $content];
@@ -119,7 +116,7 @@ class SimplesearchPlugin extends \Herbie\Plugin
 
         // @see Herbie\Application::renderPage()
         $cacheId = 'page-' . $item->route;
-        $content = $this->herbie->getPageCache()->get($cacheId);
+        $content = $this->getPageCache()->get($cacheId);
         if ($content !== null) {
             return [strip_tags($content)];
         }
@@ -143,11 +140,11 @@ class SimplesearchPlugin extends \Herbie\Plugin
         $max = 100;
         $results = [];
 
-        $usePageCache = $this->config->get('cache.page.enable', false);
-        $usePageCache &= $this->config->get('plugins.config.simplesearch.use_page_cache', false);
+        $usePageCache = $this->getConfig()->get('cache.page.enable', false);
+        $usePageCache &= $this->getConfig()->get('plugins.config.simplesearch.use_page_cache', false);
 
         $appendIterator = new \AppendIterator();
-        $appendIterator->append($this->herbie->getMenuList()->getIterator());
+        $appendIterator->append($this->getMenuList()->getIterator());
 
         foreach ($appendIterator as $item) {
             if ($i>$max || empty($item->title) || !empty($item->no_search)) {
