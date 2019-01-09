@@ -4,6 +4,8 @@ namespace herbie\plugin\simplesearch;
 
 use Herbie\Config;
 use Herbie\Environment;
+use Herbie\Event;
+use Herbie\EventManager;
 use Herbie\Menu\MenuItem;
 use Herbie\Menu\MenuList;
 use herbie\plugin\shortcode\classes\Shortcode;
@@ -14,8 +16,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\EventManager\EventInterface;
-use Zend\EventManager\EventManagerInterface;
 
 class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
 {
@@ -61,9 +61,11 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     }
 
     /**
-     * @return array
+     * @param EventManager $events
+     * @param int $priority
+     * @return void
      */
-    public function attach(EventManagerInterface $events, $priority = 1): void
+    public function attach(EventManager $events, int $priority = 1): void
     {
         $this->events = $events;
         if ((bool)$this->config->get('plugins.config.simplesearch.twig', false)) {
@@ -76,9 +78,9 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     }
 
     /**
-     * @param EventInterface $event
+     * @param Event $event
      */
-    public function onTwigInitialized(EventInterface $event)
+    public function onTwigInitialized(Event $event)
     {
         /** @var TwigRenderer $twig */
         $twig = $event->getTarget();
@@ -91,9 +93,9 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     }
 
     /**
-     * @param EventInterface $event
+     * @param Event $event
      */
-    public function onShortcodeInitialized(EventInterface $event)
+    public function onShortcodeInitialized(Event $event)
     {
         /** @var Shortcode $shortcode */
         $shortcode = $event->getTarget();
@@ -102,9 +104,9 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     }
 
     /**
-     * @param EventInterface $event
+     * @param Event $event
      */
-    public function onPluginsInitialized(EventInterface $event)
+    public function onPluginsInitialized(Event $event)
     {
         if ($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
             $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
