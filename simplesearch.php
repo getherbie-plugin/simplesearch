@@ -6,12 +6,10 @@ use Herbie\Config;
 use Herbie\Environment;
 use Herbie\Event;
 use Herbie\EventManager;
-use Herbie\Menu\MenuItem;
-use Herbie\Menu\MenuList;
-use herbie\plugin\shortcode\classes\Shortcode;
+use Herbie\Page\PageItem;
 use Herbie\PluginInterface;
 use Herbie\Repository\PageRepositoryInterface;
-use Herbie\TwigRenderer;
+use Herbie\Twig\TwigRenderer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -21,7 +19,6 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
 {
     private $config;
     private $environment;
-    private $menuList;
     private $pageRepository;
     private $twigRenderer;
     private $events;
@@ -31,14 +28,12 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
      * SimplesearchPlugin constructor.
      * @param Config $config
      * @param Environment $environment
-     * @param MenuList $menuList
      * @param PageRepositoryInterface $pageRepository
      * @param TwigRenderer $twigRenderer
      */
     public function __construct(
         Config $config,
         Environment $environment,
-        MenuList $menuList,
         PageRepositoryInterface $pageRepository,
         TwigRenderer $twigRenderer
     ) {
@@ -46,7 +41,6 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
         $this->environment = $environment;
         $this->pageRepository = $pageRepository;
         $this->twigRenderer = $twigRenderer;
-        $this->menuList = $menuList;
     }
     
     /**
@@ -68,13 +62,7 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     public function attach(EventManager $events, int $priority = 1): void
     {
         $this->events = $events;
-        if ((bool)$this->config->get('plugins.config.simplesearch.twig', false)) {
-            $events->attach('onTwigInitialized', [$this, 'onTwigInitialized'], $priority);
-        }
-        if ((bool)$this->config->get('plugins.config.simplesearch.shortcode', true)) {
-            $events->attach('onShortcodeInitialized', [$this, 'onShortcodeInitialized'], $priority);
-        }
-        $events->attach('onPluginsInitialized', [$this, 'onPluginsInitialized'], $priority);
+        $events->attach('onTwigInitialized', [$this, 'onTwigInitialized'], $priority);
     }
 
     /**
@@ -93,27 +81,6 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     }
 
     /**
-     * @param Event $event
-     */
-    public function onShortcodeInitialized(Event $event)
-    {
-        /** @var Shortcode $shortcode */
-        $shortcode = $event->getTarget();
-        $shortcode->add('simplesearch_form', [$this, 'form']);
-        $shortcode->add('simplesearch_results', [$this, 'results']);
-    }
-
-    /**
-     * @param Event $event
-     */
-    public function onPluginsInitialized(Event $event)
-    {
-        if ($this->config->isEmpty('plugins.config.simplesearch.no_page')) {
-            $this->config->push('pages.extra_paths', '@plugin/simplesearch/pages');
-        }
-    }
-
-    /**
      * @return string
      * @throws \Twig_Error_Loader
      * @throws \Twig_Error_Runtime
@@ -122,7 +89,7 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     public function form(): string
     {
         $name = $this->config->get(
-            'plugins.config.simplesearch.template.form',
+            'plugins.config.simplesearch.formTemplate',
             '@plugin/simplesearch/templates/form.twig'
         );
         $action = $this->environment->getPathInfo();
@@ -145,7 +112,7 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
         $query = $queryParams['query'] ?? '';
         $results = $this->search($query);
         $name = $this->config->get(
-            'plugins.config.simplesearch.template.results',
+            'plugins.config.simplesearch.resultsTemplate',
             '@plugin/simplesearch/templates/results.twig'
         );
         return $this->twigRenderer->renderTemplate($name, [
@@ -156,11 +123,11 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
     }
 
     /**
-     * @param MenuItem $item
+     * @param PageItem $item
      * @param bool $usePageCache
      * @return array
      */
-    private function loadPageData(MenuItem $item, bool $usePageCache): array
+    private function loadPageData(PageItem $item, bool $usePageCache): array
     {
         if (!$usePageCache) {
             $page = $this->pageRepository->find($item->path);
@@ -193,11 +160,10 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
         $max = 100;
         $results = [];
 
-        $usePageCache = $this->config->get('cache.page.enable', false);
-        $usePageCache &= $this->config->get('plugins.config.simplesearch.use_page_cache', false);
+        $usePageCache = $this->config->get('plugins.config.simplesearch.usePageCache', false);
 
         $appendIterator = new \AppendIterator();
-        $appendIterator->append($this->menuList->getIterator());
+        $appendIterator->append($this->pageRepository->findAll()->getIterator());
 
         foreach ($appendIterator as $item) {
             if ($i>$max || empty($item->title) || !empty($item->no_search)) {

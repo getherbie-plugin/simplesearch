@@ -55,7 +55,7 @@ du eine eigene Suchseite hinzufügen. Das minimale Setup für eine solche Seite 
 
     ---
     title: Suche
-    nocache: 1
+    cached: 0
     hidden: 1
     ---
     
