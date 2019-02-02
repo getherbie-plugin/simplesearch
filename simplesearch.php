@@ -2,14 +2,14 @@
 
 namespace herbie\plugin\simplesearch;
 
-use Herbie\Config;
+use Herbie\Configuration;
 use Herbie\Environment;
 use Herbie\Event;
 use Herbie\EventManager;
-use Herbie\Page\PageItem;
+use Herbie\PageItem;
 use Herbie\PluginInterface;
-use Herbie\Repository\PageRepositoryInterface;
-use Herbie\Twig\TwigRenderer;
+use Herbie\PageRepositoryInterface;
+use Herbie\TwigRenderer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -26,13 +26,13 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
 
     /**
      * SimplesearchPlugin constructor.
-     * @param Config $config
+     * @param Configuration $config
      * @param Environment $environment
      * @param PageRepositoryInterface $pageRepository
      * @param TwigRenderer $twigRenderer
      */
     public function __construct(
-        Config $config,
+        Configuration $config,
         Environment $environment,
         PageRepositoryInterface $pageRepository,
         TwigRenderer $twigRenderer
