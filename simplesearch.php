@@ -5,9 +5,8 @@ namespace herbie\plugin\simplesearch;
 use Herbie\Configuration;
 use Herbie\Environment;
 use Herbie\Event;
-use Herbie\EventManager;
 use Herbie\PageItem;
-use Herbie\PluginInterface;
+use Herbie\Plugin;
 use Herbie\PageRepositoryInterface;
 use Herbie\TwigRenderer;
 use Psr\Http\Message\ResponseInterface;
@@ -15,13 +14,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
+class SimplesearchPlugin extends Plugin implements MiddlewareInterface
 {
     private $config;
     private $environment;
     private $pageRepository;
     private $twigRenderer;
-    private $events;
     private $request;
 
     /**
@@ -54,15 +52,11 @@ class SimplesearchPlugin implements PluginInterface, MiddlewareInterface
         return $handler->handle($request);
     }
 
-    /**
-     * @param EventManager $events
-     * @param int $priority
-     * @return void
-     */
-    public function attach(EventManager $events, int $priority = 1): void
+    public function getEvents(): array
     {
-        $this->events = $events;
-        $events->attach('onTwigInitialized', [$this, 'onTwigInitialized'], $priority);
+        return [
+            ['onTwigInitialized', [$this, 'onTwigInitialized']]
+        ];
     }
 
     /**
