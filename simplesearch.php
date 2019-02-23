@@ -1,14 +1,14 @@
 <?php
 
-namespace herbie\plugin\simplesearch;
+namespace herbie\plugins\simplesearch;
 
-use Herbie\Configuration;
-use Herbie\Environment;
-use Herbie\Event;
-use Herbie\PageItem;
-use Herbie\Plugin;
-use Herbie\PageRepositoryInterface;
-use Herbie\TwigRenderer;
+use herbie\Configuration;
+use herbie\Environment;
+use herbie\Event;
+use herbie\PageItem;
+use herbie\Plugin;
+use herbie\PageRepositoryInterface;
+use herbie\TwigRenderer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -130,7 +130,7 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
             return [$title, $content];
         }
 
-        // @see Herbie\Application::renderPage()
+        // @see herbie\Application::renderPage()
         $cacheId = 'page-' . $item->route;
         $content = $this->pageCache->get($cacheId);
         if ($content !== null) {
