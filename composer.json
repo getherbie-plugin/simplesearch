@@ -6,6 +6,6 @@
     "type": "herbie-plugin",
     "license": "BSD-3-Clause",
     "require": {
-        "getherbie/herbie": "dev-development"
+        "getherbie/herbie": "v2.0.0-RC1"
     }
 }
