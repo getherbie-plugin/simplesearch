@@ -4,8 +4,5 @@
     "description": "SimpleSearch Plugin for Herbie.",
     "keywords": ["herbie", "plugin", "search", "simplesearch"],
     "type": "herbie-plugin",
-    "license": "BSD-3-Clause",
-    "require": {
-        "getherbie/herbie": "v2.0.0-RC1"
-    }
+    "license": "BSD-3-Clause"
 }
