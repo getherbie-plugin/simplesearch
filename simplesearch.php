@@ -52,7 +52,7 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    public function getEvents(): array
+    public function events(): array
     {
         return [
             ['onTwigInitialized', [$this, 'onTwigInitialized']]
@@ -67,10 +67,10 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
         /** @var TwigRenderer $twig */
         $twig = $event->getTarget();
         $twig->addFunction(
-            new \Twig_SimpleFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
+            new \TwigFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
         );
         $twig->addFunction(
-            new \Twig_SimpleFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
+            new \TwigFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
         );
     }
 
