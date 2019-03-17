@@ -13,6 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Twig\TwigFunction;
 
 class SimplesearchPlugin extends Plugin implements MiddlewareInterface
 {
@@ -67,18 +68,18 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
         /** @var TwigRenderer $twig */
         $twig = $event->getTarget();
         $twig->addFunction(
-            new \TwigFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
+            new TwigFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
         );
         $twig->addFunction(
-            new \TwigFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
+            new TwigFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
         );
     }
 
     /**
      * @return string
-     * @throws \Twig_Error_Loader
-     * @throws \Twig_Error_Runtime
-     * @throws \Twig_Error_Syntax
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
      */
     public function form(): string
     {
@@ -96,9 +97,9 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
 
     /**
      * @return string
-     * @throws \Twig_Error_Loader
-     * @throws \Twig_Error_Runtime
-     * @throws \Twig_Error_Syntax
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
      */
     public function results(): string
     {
