@@ -8,7 +8,7 @@
         <p>{{ translate('simplesearch', '{count} results found.', {'{count}': results|length}) }}</p>
         {% for result in results %}
             <div class="result">
-                <div class="title">{{ link(result.route, result.title) }}</div>
+                <div class="title">{{ page_link(result.route, result.title) }}</div>
                 <div class="url">{{ url(result.route) }}</div>
                 {% if result.date %}
                     <div class="date">{{ result.date|strftime('%e. %B %Y') }}</div>
