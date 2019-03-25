@@ -2,7 +2,7 @@
 
 namespace herbie\plugins\simplesearch;
 
-use herbie\Configuration;
+use herbie\Config;
 use herbie\Environment;
 use herbie\Event;
 use herbie\PageItem;
@@ -13,7 +13,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Twig\TwigFunction;
 
 class SimplesearchPlugin extends Plugin implements MiddlewareInterface
 {
@@ -25,13 +24,13 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
 
     /**
      * SimplesearchPlugin constructor.
-     * @param Configuration $config
+     * @param Config $config
      * @param Environment $environment
      * @param PageRepositoryInterface $pageRepository
      * @param TwigRenderer $twigRenderer
      */
     public function __construct(
-        Configuration $config,
+        Config $config,
         Environment $environment,
         PageRepositoryInterface $pageRepository,
         TwigRenderer $twigRenderer
@@ -68,18 +67,15 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
         /** @var TwigRenderer $twig */
         $twig = $event->getTarget();
         $twig->addFunction(
-            new TwigFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
+            new \Twig\TwigFunction('simplesearch_results', [$this, 'results'], ['is_safe' => ['html']])
         );
         $twig->addFunction(
-            new TwigFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
+            new \Twig\TwigFunction('simplesearch_form', [$this, 'form'], ['is_safe' => ['html']])
         );
     }
 
     /**
      * @return string
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
      */
     public function form(): string
     {
@@ -97,9 +93,6 @@ class SimplesearchPlugin extends Plugin implements MiddlewareInterface
 
     /**
      * @return string
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
      */
     public function results(): string
     {
