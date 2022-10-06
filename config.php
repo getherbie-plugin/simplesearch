@@ -7,5 +7,5 @@ return [
     'pluginPath' => __DIR__,
     'formTemplate' => null,
     'resultsTemplate' => null,
-    'usePageCache' => true
+    'usePageCache' => false
 ];
