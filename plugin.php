@@ -9,7 +9,7 @@ use herbie\TwigRenderer;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\TwigFunction;
 
-class GetherbiePluginSimplesearch extends Plugin
+class SimplesearchPlugin extends Plugin
 {
     private Config $config;
     private Environment $environment;
