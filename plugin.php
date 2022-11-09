@@ -7,10 +7,12 @@ use herbie\Plugin;
 use herbie\PageRepositoryInterface;
 use herbie\TwigRenderer;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\SimpleCache\CacheInterface;
 use Twig\TwigFunction;
 
 class SimplesearchPlugin extends Plugin
 {
+    private CacheInterface $cache;
     private Config $config;
     private Environment $environment;
     private PageRepositoryInterface $pageRepository;
@@ -18,12 +20,14 @@ class SimplesearchPlugin extends Plugin
     private TwigRenderer $twigRenderer;
 
     public function __construct(
+        CacheInterface $cache,
         Config $config,
         Environment $environment,
         PageRepositoryInterface $pageRepository,
         ServerRequestInterface $request,
         TwigRenderer $twigRenderer
     ) {
+        $this->cache = $cache;
         $this->config = $config;
         $this->environment = $environment;
         $this->pageRepository = $pageRepository;
@@ -96,8 +100,12 @@ class SimplesearchPlugin extends Plugin
             return [$title, $content];
         }
 
-        // TODO load and return cached page content
-        return [];
+        $cacheId = $item->getCacheId();
+        $html = $this->cache->get($cacheId);
+        if ($html === null) {
+            return [$item->getTitle(), ''];
+        }
+        return [$item->getTitle(), strip_tags($html)];
     }
 
     /**
