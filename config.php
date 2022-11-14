@@ -7,7 +7,9 @@ return [
     'pluginName' => 'simplesearch',
     'pluginClass' => SimplesearchPlugin::class,
     'pluginPath' => __DIR__,
-    'formTemplate' => null,
-    'resultsTemplate' => null,
-    'usePageCache' => false
+    'config' => [
+        'formTemplate' => null,
+        'resultsTemplate' => null,
+        'usePageCache' => false
+    ]
 ];
