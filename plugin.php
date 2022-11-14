@@ -1,34 +1,38 @@
 <?php
 
 use herbie\Config;
-use herbie\Environment;
 use herbie\PageItem;
 use herbie\Plugin;
 use herbie\PageRepositoryInterface;
 use herbie\TwigRenderer;
+use herbie\UrlManager;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\SimpleCache\CacheInterface;
 use Twig\TwigFunction;
 
-class GetherbiePluginSimplesearch extends Plugin
+class SimplesearchPlugin extends Plugin
 {
+    private CacheInterface $cache;
     private Config $config;
-    private Environment $environment;
     private PageRepositoryInterface $pageRepository;
     private ServerRequestInterface $request;
     private TwigRenderer $twigRenderer;
+    private UrlManager $urlManager;
 
     public function __construct(
+        CacheInterface $cache,
         Config $config,
-        Environment $environment,
         PageRepositoryInterface $pageRepository,
         ServerRequestInterface $request,
-        TwigRenderer $twigRenderer
+        TwigRenderer $twigRenderer,
+        UrlManager $urlManager
     ) {
+        $this->cache = $cache;
         $this->config = $config;
-        $this->environment = $environment;
         $this->pageRepository = $pageRepository;
         $this->request = $request;
         $this->twigRenderer = $twigRenderer;
+        $this->urlManager = $urlManager;
     }
 
     public function twigFunctions(): array
@@ -47,14 +51,14 @@ class GetherbiePluginSimplesearch extends Plugin
      */
     public function form(): string
     {
-        $name = $this->config->get('plugins.simplesearch.formTemplate', function () {
+        $name = $this->config->get('plugins.simplesearch.config.formTemplate', function () {
             return $this->getComposerOrLocalTemplatesPath('form.twig');
         });
 
-        $action = $this->environment->getPathInfo();
+        [$route] = $this->urlManager->parseRequest();
         $queryParams = $this->request->getQueryParams();
         return $this->twigRenderer->renderTemplate($name, [
-            'action' => $action,
+            'route' => $route,
             'query' => $queryParams['query'] ?? '',
         ]);
     }
@@ -71,7 +75,7 @@ class GetherbiePluginSimplesearch extends Plugin
         $query = $queryParams['query'] ?? '';
         $results = $this->search($query);
 
-        $name = $this->config->get('plugins.simplesearch.resultsTemplate', function () {
+        $name = $this->config->get('plugins.simplesearch.config.resultsTemplate', function () {
             return $this->getComposerOrLocalTemplatesPath('results.twig');
         });
 
@@ -96,8 +100,12 @@ class GetherbiePluginSimplesearch extends Plugin
             return [$title, $content];
         }
 
-        // TODO load and return cached page content
-        return [];
+        $cacheId = $item->getCacheId();
+        $html = $this->cache->get($cacheId);
+        if ($html === null) {
+            return [$item->getTitle(), ''];
+        }
+        return [$item->getTitle(), strip_tags($html)];
     }
 
     /**
@@ -115,7 +123,7 @@ class GetherbiePluginSimplesearch extends Plugin
         $max = 100;
         $results = [];
 
-        $usePageCache = $this->config->get('plugins.simplesearch.usePageCache', false);
+        $usePageCache = $this->config->get('plugins.simplesearch.config.usePageCache', false);
 
         $appendIterator = new \AppendIterator();
         $appendIterator->append($this->pageRepository->findAll()->getIterator());
