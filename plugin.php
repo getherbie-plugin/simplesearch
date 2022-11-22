@@ -1,7 +1,7 @@
 <?php
 
 use herbie\Config;
-use herbie\PageItem;
+use herbie\Page;
 use herbie\Plugin;
 use herbie\PageRepositoryInterface;
 use herbie\TwigRenderer;
@@ -87,11 +87,11 @@ class SimplesearchPlugin extends Plugin
     }
 
     /**
-     * @param PageItem $item
+     * @param Page $item
      * @param bool $usePageCache
      * @return array
      */
-    private function loadPageData(PageItem $item, bool $usePageCache): array
+    private function loadPageData(Page $item, bool $usePageCache): array
     {
         if (!$usePageCache) {
             $page = $this->pageRepository->find($item->path);
