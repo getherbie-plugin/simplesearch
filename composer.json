@@ -1,11 +1,11 @@
 {
     "name": "getherbie/plugin-simplesearch",
-    "homepage": "https://www.getherbie.org",
+    "homepage": "https://github.com/getherbie",
     "description": "SimpleSearch Plugin for Herbie.",
     "keywords": ["herbie", "plugin", "search", "simplesearch"],
     "type": "herbie-plugin",
     "license": "BSD-3-Clause",
     "require-dev": {
-        "getherbie/herbie": "dev-2.x-develop"
+        "getherbie/herbie": "^2.0"
     }
 }
