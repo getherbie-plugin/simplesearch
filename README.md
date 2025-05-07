@@ -10,22 +10,30 @@ The plugin is installed with Composer.
 
 After that, the plugin can be activated in the configuration file.
 
-    plugins:
-        enable:
-            - simplesearch
-
 ## Configuration
 
-Under `plugins.simplesearch.config` the following options are available.
+The following options are available in the configuration file.
 
-Template paths to twig templates:
+~~~php
+return [
+    // a comma-separated list of plugins to be activated
+    'enabledPlugins' => 'simplesearch',
+    'plugins' => [        
+        'simplesearch' => [
+            'config' => [
+                // path to twig form template
+                'formTemplate' => '@plugin/simplesearch/templates/form.twig',
+                // path to twig results template
+                'resultsTemplate' => '@plugin/simplesearch/templates/results.twig',
+                // use page cahe if global caching is enabled
+                'usePageCache' => false,
+            ],
+        ],
+    ],
+];
+~~~
 
-    formTemplate: @plugin/simplesearch/templates/form.twig
-    resultsTemplate: @plugin/simplesearch/templates/results.twig
-
-Use page cache, if caching is enabled:
-
-    usePageCache: false
+Please note that the above configuration is only part of the overall configuration.
 
 ## Page properties
 
